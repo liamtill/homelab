@@ -1,0 +1,54 @@
+---
+# tasks file for roles/docker
+- name: apt update
+  become: yes
+  apt:
+    update_cache: yes
+- name: install dependencies
+  become: yes
+  apt:
+    pkg: 
+    - ca-certificates
+    - curl
+    - gnupg
+    - lsb-release
+    update_cache: yes
+- name: create keyrings dir
+  become: yes
+  file:
+    path: /etc/apt/keyrings
+    state: directory
+- include_tasks: setup-Ubuntu.yaml
+  when: ansible_distribution == 'Ubuntu'
+- include_tasks: setup-Debian.yaml
+  when: ansible_distribution == 'Debian'
+- name: apt update
+  become: yes
+  apt:
+    # update: yes
+    update_cache: yes
+- name: install docker
+  become: yes
+  apt:
+    pkg:
+    - docker-ce
+    - docker-ce-cli
+    - containerd.io
+    - docker-compose-plugin
+- name: check docker group
+  become: yes
+  group:
+    name: docker
+    state: present
+- name: add user to docker group
+  become: yes
+  user:
+    name: liam
+    groups: docker
+    append: yes
+- name: check docker service running
+  become: yes
+  service:
+    name: docker
+    state: started
+    enabled: yes

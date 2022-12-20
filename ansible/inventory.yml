@@ -1,0 +1,35 @@
+all:
+  vars:
+    # These are global variables, they can be overwritten at the host level
+    ansible_user: liam
+    # We can use variables by putting them in double curly brackets
+    # these variables are assigned in a vault file and read here
+    #ansible_ssh_pass: '{{ host_default_pass }}'
+    # The "become_pass" is used from sudo commands
+    ansible_become_pass: '{{ host_default_pass }}'
+    ansible_ssh_private_key_file: '{{ host_ssh_key }}'
+    ansible_python_interpreter: auto_silent
+    # This little trick is to use short hostnames like myhost
+    # instead of myhost.mynetwork.local, the domain can be overwritten
+    # at the host level as well
+    #ansible_host: '{{ inventory_hostname }}.{{ host_domain }}'
+    #host_domain: 'mynetwork.local'
+  hosts:
+    # These are hosts on the global level, we can also group hosts as
+    # seen below under "children"
+    media-server:
+    # another_hostname:
+    # This host has a variable overwriting the global become_pass variable
+    # third_host:
+    #   host_domain: someothernetwork.tld
+  children:
+    # These are host groups, we can use groups later to target
+    # hosts as a group instead of individually
+    containers:
+      hosts:
+        pihole: {ansible_host: 192.168.1.124}
+    # virtual_machines:
+    #   hosts:
+    #     some_hostname:
+    #     third_host:
+

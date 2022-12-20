@@ -1,0 +1,51 @@
+- hosts: media-server
+  roles:
+    - base
+    - user
+    - nfs_shares
+    - ffmpeg
+    - docker
+    - deploy_watchtower
+    - rclone
+  tasks:
+    - name: get jellyfin backup
+      shell: rclone sync mega:/backup/docker/jellyfin /home/liam/docker/jellyfin
+    - name: run jellyfin container
+    community.docker.docker_compose:
+      project_src: '/home/liam/docker/jellyfin'
+      files:
+      - docker-compose.yaml
+    register: output
+
+    - ansible.builtin.debug:
+        var: output
+
+    - name: get *arr backups
+      shell: rclone sync mega:/backup/docker/{{ item }} /home/liam/docker/{{ item }}
+      loop:
+        - sonarr
+        - radarr
+        - nzbget
+        - jellyseer
+        - bazarr
+        - prowlarr
+    - name: run *arr containers
+        community.docker.docker_compose:
+        project_src: '/home/liam/docker'
+        files:
+        - docker-compose.yaml
+        register: output
+
+    - ansible.builtin.debug:
+        var: output
+
+    - ansible.builtin.assert:
+      that:
+        - "{{ item }}.state.running"
+      loop:
+        - sonarr
+        - radarr
+        - nzbget
+        - jellyseer
+        - bazarr
+        - prowlarr

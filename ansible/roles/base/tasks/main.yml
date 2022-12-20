@@ -1,0 +1,30 @@
+---
+# tasks file for roles/base
+- name: update and upgrade apt packages
+  become: yes
+  apt:
+    upgrade: yes
+    update-cache: yes
+- name: install qemu guest agent
+  become: yes
+  apt:
+    name: qemu-guest-agent
+- name: install zips
+  become: yes
+  apt:
+    pkg: 
+      - 7zip
+      - unzip
+- name: install pip
+  become: yes
+  apt:
+    name: python-pip
+- name: install ansible dependency pip docker
+  pip:
+    name: 
+      - docker
+      - docker-compose
+- name: install fail2ban
+  become: yes
+  apt:
+    name: fail2ban

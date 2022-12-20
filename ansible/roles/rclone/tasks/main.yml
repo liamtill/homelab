@@ -1,0 +1,16 @@
+---
+# tasks file for roles/rclone
+- name: install rclone
+  become: yes
+  shell: curl https://rclone.org/install.sh | sudo bash
+  args: 
+    warn: no
+- name: config rclone
+  blockinfile:
+    path: /home/liam/.config/rclone/rclone.conf
+    create: true
+    block: |
+      [mega]
+      type = mega
+      user = {{ rclone_user }}
+      pass = {{ rclone_pass }}

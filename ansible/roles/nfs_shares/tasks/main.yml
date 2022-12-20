@@ -1,0 +1,25 @@
+---
+# tasks file for roles/nfs_shares
+- name: make share directories
+  become: yes
+  file:
+    path: "{{ item }}"
+    state: directory
+  loop:
+      #- /media/data1
+      - /media/data2
+# - name: mount data1 and update fstab
+#   ansible.posix.mount:
+#     src: 192.168.1.206:/data1
+#     path: /media/data1
+#     opts: rw,relatime,user
+#     state: mounted
+#     fstype: nfs
+- name: mount data2 and update fstab
+  become: yes
+  ansible.posix.mount:
+    src: 192.168.1.206:/data2
+    path: /media/data2
+    opts: rw,relatime,user
+    state: mounted
+    fstype: nfs

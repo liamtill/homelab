@@ -1,0 +1,13 @@
+---
+# tasks file for roles/deploy_watchtower
+- name: fetch watchtower compose from mega backup
+  shell: rclone sync mega:/backup/docker/watchtower /home/liam/docker/watchtower
+- name: run watchtower container
+  community.docker.docker_compose:
+    project_src: '/home/liam/docker/watchtower'
+    files:
+    - docker-compose.yaml
+  register: output
+
+- ansible.builtin.debug:
+    var: output
