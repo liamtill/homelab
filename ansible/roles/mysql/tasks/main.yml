@@ -1,0 +1,89 @@
+---
+# tasks file for mysql
+- name: apt update
+  become: yes
+  apt:
+    update_cache: yes
+- name: install mysql server and dependencies
+  become: yes
+  apt:
+    pkg: 
+    - mysql-server
+    - python3-pymysql 
+    update_cache: yes
+- name: start and enable mysql service
+  become: yes
+  systemd:
+    state: started
+    enabled: true
+    service: mysql
+- name: set root user password and privs
+  become: true
+  community.mysql.mysql_user:
+    name: root
+    password: "{{ mysql_root_password }}"
+    # priv: '*.*:ALL,GRANT'
+    # state: present
+    login_unix_socket: /var/run/mysqld/mysqld.sock
+    plugin: mysql_native_password
+# - name: set root auth method back to auth_socket
+#   become: true
+#   community.mysql.mysql_user:
+#     login_user: root
+#     login_password: "{{ mysql_root_password }}"
+#     name: root
+#     plugin: auth_socket
+- name: put my.cnf in root dir
+  become: yes
+  template:
+    src: my.cnf.j2
+    dest: /root/.my.cnf
+    owner: root
+    group: root
+    mode: 0644
+  notify: restart mysql
+- name: create my default user
+  community.mysql.mysql_user:
+    login_user: root
+    login_password: "{{ mysql_root_password }}"
+    name: "{{ mysql_user_name }}"
+    host: '%'
+    password: "{{ mysql_user_password }}"
+    priv: '*.*:ALL,GRANT'
+    state: present
+  notify: restart mysql
+- name: Copy user-my.cnf file with password credentials
+  template:
+    src: "user.cnf.j2"
+    dest: "/home/liam/.my.cnf"
+    owner: "{{ mysql_user_name }}"
+    mode: 0600
+- name: Output users
+  community.mysql.mysql_query:
+    login_db: mysql
+    login_user: "{{ mysql_user_name }}"
+    login_password: "{{ mysql_user_password }}"
+    query: SELECT User, Host FROM user
+    login_unix_socket: /run/mysqld/mysqld.sock
+  register: output
+- name: update /etc/mysql/my.cnf with 0.0.0.0 bind address
+  become: yes
+  blockinfile:
+    path: /etc/mysql/my.cnf
+    backup: yes
+    block: |
+      [mysqld]
+      bind-address=0.0.0.0
+  notify: restart mysql
+
+
+
+# - name: put my.cnf /etc/mysql
+#   become: yes
+#   template:
+#     src: my.cnf.j2
+#     dest: /etc/mysql/my.cnf
+#     owner: root
+#     group: root
+#     mode: 0644
+#   notify: restart mysql

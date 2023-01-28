@@ -1,0 +1,5 @@
+---
+# playbook to reboot machine
+
+- name: Unconditionally reboot the machine with all defaults
+  ansible.builtin.reboot:
