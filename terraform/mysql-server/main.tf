@@ -1,11 +1,11 @@
-resource "proxmox_vm_qemu" "ubuntu-server" {
+resource "proxmox_vm_qemu" "mysql-server" {
 
     # pve node
     target_node = "nimbus-pve"
 
     # define machine name
-    name = "ubuntu-server"
-    desc = "Ubuntu Server 20.04"
+    name = "mysql"
+    desc = "MySQL Server"
     
     # enable the qemu-guest-agent
     agent = 1
@@ -17,13 +17,14 @@ resource "proxmox_vm_qemu" "ubuntu-server" {
 
     # vm settings
     os_type = "cloud-init"
-    cores = 1
+    cores = 2
     sockets = 1
     cpu = "host"
-    memory = 1024
+    memory = 2048
     scsihw = "virtio-scsi-pci"
     bootdisk = "scsi0"
     boot = "cdn"
+    onboot = "true"
 
     # define network hw
     network {
@@ -50,16 +51,16 @@ resource "proxmox_vm_qemu" "ubuntu-server" {
   }
 
   # machine ip
-  provisioner "remote-exec" {
-    inline = [
-      "ip a"
-    ]
-  }
+  # provisioner "remote-exec" {
+  #   inline = [
+  #     "ip a"
+  #   ]
+  # }
 
-  # local commands, will use to run ansible plaaybooks for config
+
+  # local commands, will use to run ansible playbooks for config
   #provisioner "local-exec" {
     #command = ""
   #}
 
 }
-
