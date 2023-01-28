@@ -13,12 +13,12 @@
   become: yes
   apt:
     pkg: 
-      - 7zip
+      - p7zip-full
       - unzip
 - name: install pip
   become: yes
   apt:
-    name: python-pip
+    name: python3-pip
 - name: install ansible dependency pip docker
   pip:
     name: 

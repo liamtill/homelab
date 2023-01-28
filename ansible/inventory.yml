@@ -18,11 +18,9 @@ all:
     # These are hosts on the global level, we can also group hosts as
     # seen below under "children"
     media-server:
-    
-    # another_hostname:
-    # This host has a variable overwriting the global become_pass variable
-    # third_host:
-    #   host_domain: someothernetwork.tld
+    docker-vm:
+    mysql-server: {ansible_host: 192.168.1.189}
+    lorenz: { ansible_user: ubuntu }
   children:
     # These are host groups, we can use groups later to target
     # hosts as a group instead of individually

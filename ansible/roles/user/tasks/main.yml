@@ -4,7 +4,7 @@
   become: yes
   ansible.builtin.user:
     name: liam
-    password: {{ my_user_pass }}
+    password: "{{ my_user_pass }}"
 - name: add to sudo group
   become: yes
   ansible.builtin.user:
