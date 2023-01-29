@@ -11,14 +11,17 @@ resource "proxmox_lxc" "ubuntu-ct" {
     clone = "6000"
     # full clone
     full = "true"
-    # start at boot
+    # start after creation
     start = "true"
+    # start on boot
+    onboot = "true"
 
     # ct settings
     clone_storage = "local-lvm"
     cores = 1
     memory = 1024
-
+    #swap = 2048
+    
     # define network
     network {
       bridge = "vmbr0"
@@ -26,12 +29,10 @@ resource "proxmox_lxc" "ubuntu-ct" {
       ip = "dhcp"
     }
 
-  # ct ip
-  provisioner "remote-exec" {
-    inline = [
-      "ip a"
-    ]
-  }
+    rootfs {
+      storage = "local-lvm"
+      size    = "8G"
+    }
 
 }
 

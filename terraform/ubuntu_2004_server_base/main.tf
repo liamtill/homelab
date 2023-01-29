@@ -49,13 +49,6 @@ resource "proxmox_vm_qemu" "ubuntu-server" {
     ]
   }
 
-  # machine ip
-  provisioner "remote-exec" {
-    inline = [
-      "ip a"
-    ]
-  }
-
   # local commands, will use to run ansible plaaybooks for config
   #provisioner "local-exec" {
     #command = ""
