@@ -1,20 +1,17 @@
 ---
-# tasks file for roles/base
+# tasks file for container-base
 - name: update and upgrade apt packages
   become: yes
   apt:
     upgrade: yes
     update-cache: yes
-- name: install qemu guest agent
-  become: yes
-  apt:
-    name: qemu-guest-agent
-- name: install some useful packages
+- name: install some useful pacakges
   become: yes
   apt:
     pkg: 
       - p7zip-full
       - unzip
+      - curl
 - name: install pip
   become: yes
   apt:
