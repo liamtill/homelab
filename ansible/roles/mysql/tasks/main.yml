@@ -22,8 +22,6 @@
   community.mysql.mysql_user:
     name: root
     password: "{{ mysql_root_password }}"
-    # priv: '*.*:ALL,GRANT'
-    # state: present
     login_unix_socket: /var/run/mysqld/mysqld.sock
     plugin: mysql_native_password
 # - name: set root auth method back to auth_socket
@@ -52,12 +50,12 @@
     priv: '*.*:ALL,GRANT'
     state: present
   notify: restart mysql
-- name: Copy user-my.cnf file with password credentials
-  template:
-    src: "user.cnf.j2"
-    dest: "/home/liam/.my.cnf"
-    owner: "{{ mysql_user_name }}"
-    mode: 0600
+# - name: Copy user-my.cnf file with password credentials
+#   template:
+#     src: "user.cnf.j2"
+#     dest: "/home/liam/.my.cnf"
+#     owner: "{{ mysql_user_name }}"
+#     mode: 0600
 - name: Output users
   community.mysql.mysql_query:
     login_db: mysql
@@ -75,7 +73,6 @@
       [mysqld]
       bind-address=0.0.0.0
   notify: restart mysql
-
 
 
 # - name: put my.cnf /etc/mysql

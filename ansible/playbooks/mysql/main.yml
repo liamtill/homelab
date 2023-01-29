@@ -1,5 +1,4 @@
 - hosts: mysql-server
   roles:
-    - base
-    - user
+    - lxc-base
     - mysql
