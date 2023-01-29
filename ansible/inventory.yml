@@ -17,18 +17,24 @@ all:
   hosts:
     # These are hosts on the global level, we can also group hosts as
     # seen below under "children"
-    media-server:
-    docker-vm:
-    mysql-server: {ansible_host: 192.168.1.189}
-    lorenz: { ansible_user: ubuntu }
   children:
     # These are host groups, we can use groups later to target
     # hosts as a group instead of individually
+    # hosts without ips defiend re configured in .ssh/config
     containers:
+      vars:
+        ansible_user: root
       hosts:
-        pihole: {ansible_host: 192.168.1.124}
-    # virtual_machines:
-    #   hosts:
-    #     some_hostname:
-    #     third_host:
-
+        pihole:
+          ansible_host: 192.168.1.124
+        mysql-server:
+          ansible_host: 192.168.1.245
+    virtual_machines:
+      hosts:
+        media-server:
+        docker:
+    oci:
+      vars:
+        ansible_user: ubuntu
+      hosts:
+        lorenz:
