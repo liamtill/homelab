@@ -34,6 +34,16 @@ variable "proxmox_user_password" {
     sensitive = true
 }
 
+variable "ssh_public_key" {
+    type = string
+    sensitive = true
+}
+
+variable "container_password" {
+    type = string
+    sensitive = true
+}
+
 provider "proxmox" {
     pm_api_url = var.proxmox_api_url
     # pm_api_token_id = var.proxmox_api_token_id
@@ -46,14 +56,4 @@ provider "proxmox" {
     pm_tls_insecure = true
 
     # pm_debug = true
-}
-
-variable "container_password" {
-    type = string
-    sensitive = true
-}
-
-variable "ssh_public_key" {
-    type = string
-    sensitive = true
 }
