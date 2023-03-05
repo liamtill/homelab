@@ -52,3 +52,7 @@
     name: docker
     state: started
     enabled: yes
+- name: create docker dir in home dir
+  file:
+    path: "/home/liam/docker"
+    state: directory

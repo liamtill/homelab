@@ -5,7 +5,7 @@
   apt:
     upgrade: yes
     update-cache: yes
-- name: install some useful pacakges
+- name: install some useful packages
   become: yes
   apt:
     pkg: 

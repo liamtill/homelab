@@ -2,9 +2,9 @@
 # tasks file for roles/rclone
 - name: install rclone
   become: yes
-  shell: curl https://rclone.org/install.sh | sudo bash
-  args: 
-    warn: no
+  shell: "curl https://rclone.org/install.sh | sudo bash"
+  # args: 
+  #   warn: no
 - name: config rclone
   blockinfile:
     path: /home/liam/.config/rclone/rclone.conf

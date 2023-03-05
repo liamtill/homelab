@@ -1,0 +1,14 @@
+- hosts: dev-vm
+  roles:
+    - base
+    - user
+    - docker
+    - rclone
+
+  tasks:
+    - name: create docker dir in home dir
+      become: yes
+      become_user: liam
+      file:
+        path: /home/liam/docker
+        state: directory
