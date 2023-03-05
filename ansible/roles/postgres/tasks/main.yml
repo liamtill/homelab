@@ -1,0 +1,41 @@
+---
+# tasks file for postgres
+- name: apt update
+  become: yes
+  apt:
+    update_cache: yes
+- name: install postgresql and dependencies
+  become: yes
+  apt:
+    pkg: 
+    - python3-psycopg2
+    - libpq-dev
+    - postgresql-12
+    - postgresql-contrib 
+    update_cache: yes
+- name: start and enable postgres service
+  become: yes
+  systemd:
+    state: started
+    enabled: true
+    service: postgresql
+- name: add user to psql using newly created postgres system user to access psql
+  become: yes
+  become_user: postgres
+  community.postgresql.postgresql_user:
+    name: "{{ psql_user_name }}"
+    password: "{{ psql_user_password }}"
+- name: change local login to md5 from peer
+  lineinfile:
+    path: /etc/postgresql/12/main/pg_hba.conf
+    search_string: 'local   all             all                                     peer'
+    line: local   all             all                                     md5'
+- name: add local network connection to pg_hba.conf
+  lineinfile:
+    path: /etc/postgresql/12/main/pg_hba.conf
+    line: host    all             all             192.168.1.0/24          md5
+- name: add remote listen to postgresql.conf
+  lineinfile:
+    path: /etc/postgresql/12/main/postgresql.conf
+    insertbefore: listen_addresses = 'localhost'
+    line: listen_addresses = '*'

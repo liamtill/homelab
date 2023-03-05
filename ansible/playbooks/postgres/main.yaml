@@ -1,0 +1,4 @@
+- hosts: postgres-server
+  roles:
+    - lxc-base
+    - postgres
