@@ -1,2 +1,7 @@
 ---
 # handlers file for roles/deploy_watchtower
+- name: restart watchtower container
+  community.docker.docker_container:
+    name: watchtower
+    state: started
+    restart: true

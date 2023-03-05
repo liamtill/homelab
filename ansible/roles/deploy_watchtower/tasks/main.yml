@@ -1,12 +1,23 @@
 ---
 # tasks file for roles/deploy_watchtower
-- name: fetch watchtower compose from mega backup
-  shell: rclone sync mega:/backup/docker/watchtower /home/liam/docker/watchtower
+- name: copy compose file
+  copy:
+    src: files/{{ item }}
+    dest: /home/{{ ansible_user }}/docker/watchtower/{{ item }}
+  loop:
+    - docker-compose.yaml
+
+- name: copy env file
+  template:
+    src: env.j2
+    dest: /home/{{ ansible_user }}/docker/watchtower/.env
+  notify: restart watchtower container
+
 - name: run watchtower container
   community.docker.docker_compose:
-    project_src: '/home/liam/docker/watchtower'
+    project_src: '/home/{{ ansible_user }}/docker/watchtower'
     files:
-    - docker-compose.yaml
+      - docker-compose.yaml
   register: output
 
 - ansible.builtin.debug:
