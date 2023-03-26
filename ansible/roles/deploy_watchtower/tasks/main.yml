@@ -1,5 +1,11 @@
 ---
 # tasks file for roles/deploy_watchtower
+
+- name: creating required directories
+  file:
+    path: "/home/{{ ansible_user }}/docker/watchtower/"
+    state: directory
+
 - name: copy compose file
   copy:
     src: files/{{ item }}

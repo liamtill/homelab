@@ -53,7 +53,7 @@
 # - name: Copy user-my.cnf file with password credentials
 #   template:
 #     src: "user.cnf.j2"
-#     dest: "/home/liam/.my.cnf"
+#     dest: "/home/{{ ansible_user }}/.my.cnf"
 #     owner: "{{ mysql_user_name }}"
 #     mode: 0600
 - name: Output users

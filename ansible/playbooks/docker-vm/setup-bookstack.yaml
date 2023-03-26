@@ -1,0 +1,52 @@
+---
+# playbook to setup bookstack docker container
+
+# create db user
+- name: create bookstack user
+  community.mysql.mysql_user:
+    login_user: root
+    login_password: "{{ mysql_root_password }}"
+    name: "{{ bookstack_db_user }}"
+    host: '%'
+    password: "{{ bookstack_db_password }}"
+    state: present
+
+# create directories
+- name: creating required directories
+  file:
+    path: "{{ item }}"
+    state: directory
+  loop:
+      - /home/{{ ansible_user }}/docker/bookstack
+      - "{{ bookstack_data_dir }}"
+
+# copy compose and env using template
+- name: copy env file
+  template:
+    src: playbooks/docker-vm/templates/env/bookstack.j2
+    dest: /home/{{ ansible_user }}/docker/bookstack/.env
+- name: copy compose file
+  copy: 
+    src:  playbooks/docker-vm/templates/docker-compose/bookstack.yaml
+    dest: /home/{{ ansible_user }}/docker/bookstack/docker-compose.yaml
+
+# get static data from mega backup
+# ignore stderr if not exist
+- name: restore static data from mega
+  shell: rclone copy mega:/backup/docker/bookstack/data/ /home/{{ ansible_user }}/docker/bookstack/data 2>/dev/null
+
+# start container
+- name: start bookstack container
+  community.docker.docker_compose:
+    project_src: /home/{{ ansible_user }}/docker/bookstack
+    files:
+      - docker.compose.yaml
+    register: output
+
+- debug:
+    var: output
+
+- assert:
+    that:
+      - bookstack.state.running
+    

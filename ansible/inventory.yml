@@ -28,11 +28,20 @@ all:
         pihole:
           ansible_host: 192.168.1.124
         mysql-server:
-          ansible_host: 192.168.1.245
+          ansible_host: 192.168.1.134
+        postgres-server:
+          ansible_host: 192.168.1.232
+        dev-ct:
+          ansible_host:
     virtual_machines:
       hosts:
         media-server:
-        docker:
+        docker-vm:
+          ansible_host: 192.168.1.200
+        dev-vm:
+          ansible_host: 192.168.1.214
+        traefik-test:
+          ansible_host: 192.168.1.187
     oci:
       vars:
         ansible_user: ubuntu

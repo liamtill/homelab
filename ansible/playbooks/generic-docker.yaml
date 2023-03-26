@@ -8,7 +8,7 @@
   tasks:
     - name: create docker dir in home dir
       become: yes
-      become_user: liam
+      become_user: {{ ansible_user }}
       file:
-        path: /home/liam/docker
+        path: /home/{{ ansible_user }}/docker
         state: directory

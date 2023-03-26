@@ -1,0 +1,16 @@
+# BookStack env vars
+PUID=1000
+PGID=1000
+APP_URL="{{ bookstack_app_url }}"
+DB_HOST="{{ mysql_host }}"
+DB_USER="{{ bookstack_db_user }}"
+DB_PASS="{{ bookstack_db_password }}"
+DB_DATABASE=bookstackapp
+BOOKSTACK_DATA="{{ bookstack_data_dir }}"
+TZ=Europe/London
+
+# MySQL DB env vars
+MYSQL_ROOT_PASSWORD="{{ mysql_root_password }}"
+MYSQL_DATABASE=bookstackapp
+MYSQL_USER="{{ bookstack_db_user }}"
+MYSQL_PASSWORD="{{ bookstack_db_password }}"

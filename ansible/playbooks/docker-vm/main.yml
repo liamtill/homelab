@@ -1,0 +1,70 @@
+- hosts: docker-vm
+  roles:
+    - base
+    - user
+    - docker
+    - deploy_watchtower
+    - rclone
+  # vars_files:
+  #   - host_vars/docker-vm.yaml
+  tasks:
+
+    # install pymysql dependency on host
+    - name: install python3 pymysql 
+      become: yes
+      apt:
+        name: python3-pymysql
+
+    # setup bookstack
+    - name: setup bookstack
+      import_tasks: setup-bookstack.yaml
+
+    # ignoring stderr for those that do not exist
+    - name: get backed up docker containers
+      shell: rclone sync mega:/backup/docker/{{ item }} /home/{{ ansible_user }}/docker/{{ item }} 2>/dev/null
+      loop:
+        - syncthing
+    - name: run restored docker containers
+      community.docker.docker_compose:
+        project_src: '/home/{{ ansible_user }}/docker/{{ item }}'
+        files:
+        - docker-compose.yaml
+        loop:
+          - syncthing
+        register: output
+
+    - ansible.builtin.debug:
+        var: output
+
+    - ansible.builtin.assert:
+        that:
+          - "{{ item }}.state.running"
+        loop:
+          - syncthing
+
+    - name: copy docker compose files
+      copy:
+        src: "compose-files/{{ item.file }}"
+        dest: "/home/{{ ansible_user }}/docker/{{ item.name }}/docker-compose.yaml"
+      loop:
+        - { name: "portainer", file: "portainer.yaml" }
+        - { name: "adminer", file: "adminer.yaml"}
+    - name: run containers
+      community.docker.docker_compose:
+        project_src: "/home/{{ ansible_user }}/docker/{{ item }}"
+        files:
+        - docker-compose.yaml
+        loop:
+          - portainer
+          - adminer
+        register: output
+
+    - ansible.builtin.debug:
+        var: output
+
+    - ansible.builtin.assert:
+        that:
+          - "{{ item }}.state.running"
+        loop:
+          - portainer
+          - adminer

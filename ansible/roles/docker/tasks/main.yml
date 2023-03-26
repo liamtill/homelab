@@ -43,7 +43,7 @@
 - name: add user to docker group
   become: yes
   user:
-    name: liam
+    name: {{ ansible_user }}
     groups: docker
     append: yes
 - name: check docker service running
@@ -54,5 +54,5 @@
     enabled: yes
 - name: create docker dir in home dir
   file:
-    path: "/home/liam/docker"
+    path: "/home/{{ ansible_user }}/docker"
     state: directory

@@ -1,0 +1,61 @@
+- hosts: lorenz
+  roles:
+    - base
+    - docker
+    - deploy_watchtower
+    - rclone
+  tasks:
+    - name: get gotify container backup
+      shell: rclone sync mega:/backup/docker/gotify /home/{{ ansible_user }}/ubuntu/gotify
+    - name: run gotifyy container
+        community.docker.docker_compose:
+        project_src: '/home/ubuntu/docker'
+        files:
+        - docker-compose.yaml
+        register: output
+
+    - ansible.builtin.debug:
+        var: output
+
+    - ansible.builtin.assert:
+      that:
+        - "gotify.state.running"
+
+    - name: create postgres data and backup dirs
+      file:
+        path: /home/ubuntu/docker/postgres/{{ item }}
+        state: directory
+      loop:
+      - backup
+      - data
+
+    - name: copy postgres docker-compose.yaml
+      copy:
+        src: compose-files/postgres/{{ item }}
+        dest: /home/ubunt/docker/postgres
+      loop:
+      - docker-compose.yaml
+      - .env
+    - name: run postgres container
+      community.docker.docker_compose:
+      project_src: /home/ubuntu/docker/postgres
+      files:
+      - docker-compose.yaml
+      register: output
+
+    - ansible.builtin.debug:
+      var: output
+
+    - ansible.builtin.assert:
+      that:
+        - "postgres.state.running"
+
+    - name: get backed up stocks postgres database
+    shell: rclone sync mega:/backup/postgres/stocks_db_backup.gz /home/ubuntu/docker/postgres/backup/stocks_db_backup.gz
+
+    - name: restore stocks database to postgres
+      postgres_db:
+        name: stocks
+        state: restore
+        target: /home/{{ ansible_user }}/docker/postgres/backup/stocks_db_backup.gz
+      become_user: stocks

@@ -7,7 +7,7 @@
   #   warn: no
 - name: config rclone
   blockinfile:
-    path: /home/liam/.config/rclone/rclone.conf
+    path: /home/{{ ansible_user }}/.config/rclone/rclone.conf
     create: true
     block: |
       [mega]

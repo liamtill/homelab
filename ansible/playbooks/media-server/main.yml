@@ -9,10 +9,10 @@
     - rclone
   tasks:
     - name: get jellyfin backup
-      shell: rclone sync mega:/backup/docker/jellyfin /home/liam/docker/jellyfin
+      shell: rclone copy mega:/backup/docker/jellyfin /home/{{ ansible_user }}/docker/jellyfin
     - name: run jellyfin container
     community.docker.docker_compose:
-      project_src: '/home/liam/docker/jellyfin'
+      project_src: '/home/{{ ansible_user }}/docker/jellyfin'
       files:
       - docker-compose.yaml
     register: output
@@ -21,7 +21,7 @@
         var: output
 
     - name: get *arr backups
-      shell: rclone sync mega:/backup/docker/{{ item }} /home/liam/docker/{{ item }}
+      shell: rclone copy mega:/backup/docker/media-stack/{{ item }} /home/{{ ansible_user }}/docker/media-stack/{{ item }}
       loop:
         - sonarr
         - radarr
@@ -31,7 +31,7 @@
         - prowlarr
     - name: run *arr containers
         community.docker.docker_compose:
-        project_src: '/home/liam/docker'
+        project_src: '/home/{{ ansible_user }}/docker/media-stack'
         files:
         - docker-compose.yaml
         register: output
