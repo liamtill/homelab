@@ -1,5 +1,9 @@
 ---
 # tasks file for roles/nfs_shares
+- name: install nfs-common
+  become: yes
+  apt:
+    name: nfs-common
 - name: make share directories
   become: yes
   file:

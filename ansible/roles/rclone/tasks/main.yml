@@ -1,10 +1,17 @@
 ---
 # tasks file for roles/rclone
+- name: Gather the package facts
+  ansible.builtin.package_facts:
+    manager: auto
+- name: Check for rclone installed
+  debug: 
+    msg: rclone installed
+  when: "'rclone' in ansible_facts.packages"
+  register: rclone_installed
 - name: install rclone
   become: yes
   shell: "curl https://rclone.org/install.sh | sudo bash"
-  # args: 
-  #   warn: no
+  when: "{{ rclone_installed|length==0 }}"
 - name: config rclone
   blockinfile:
     path: /home/{{ ansible_user }}/.config/rclone/rclone.conf

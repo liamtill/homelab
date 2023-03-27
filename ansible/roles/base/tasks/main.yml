@@ -15,6 +15,7 @@
     pkg: 
       - p7zip-full
       - unzip
+      - rsync
 - name: install pip
   become: yes
   apt:

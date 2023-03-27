@@ -36,6 +36,7 @@ all:
     virtual_machines:
       hosts:
         media-server:
+          ansible_host: 192.168.1.218
         docker-vm:
           ansible_host: 192.168.1.200
         dev-vm:

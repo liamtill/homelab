@@ -43,9 +43,12 @@
 - name: add user to docker group
   become: yes
   user:
-    name: {{ ansible_user }}
+    name: "{{ ansible_user }}"
     groups: docker
     append: yes
+- name: reset ssh connection to allow user changes to affect ansible user
+  ansible.builtin.meta:
+    reset_connection
 - name: check docker service running
   become: yes
   service:
