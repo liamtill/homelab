@@ -8,44 +8,58 @@
     - deploy_watchtower
     - rclone
   tasks:
-    - name: get jellyfin backup
-      shell: rclone copy mega:/backup/docker/jellyfin /home/{{ ansible_user }}/docker/jellyfin
-    - name: run jellyfin container
-    community.docker.docker_compose:
-      project_src: '/home/{{ ansible_user }}/docker/jellyfin'
-      files:
-      - docker-compose.yaml
-    register: output
-
-    - ansible.builtin.debug:
-        var: output
-
-    - name: get *arr backups
-      shell: rclone copy mega:/backup/docker/media-stack/{{ item }} /home/{{ ansible_user }}/docker/media-stack/{{ item }}
+    # - name: get jellyfin backup
+    #   shell: rclone copy mega:/backup/docker/jellyfin /home/{{ ansible_user }}/docker/jellyfin
+    # - name: get *arr backups
+    #   shell: rclone copy mega:/backup/docker/media-stack/{{ item }} /home/{{ ansible_user }}/docker/media-stack/{{ item }}
+    #   loop:
+    #     - sonarr
+    #     - radarr
+    #     - nzbget
+    #     - jellyseer
+    #     - bazarr
+    #     - prowlarr
+    - name: creating required directories
+      file:
+        path: "/home/{{ ansible_user }}/docker/{{ item }}"
+        state: directory
       loop:
-        - sonarr
-        - radarr
-        - nzbget
-        - jellyseer
-        - bazarr
-        - prowlarr
-    - name: run *arr containers
-        community.docker.docker_compose:
-        project_src: '/home/{{ ansible_user }}/docker/media-stack'
-        files:
-        - docker-compose.yaml
-        register: output
+          - jellyfin
+          - media-stack
+    - name: copy docker compose files
+      copy:
+        src: "templates/docker-compose/{{ item.file }}"
+        dest: "/home/{{ ansible_user }}/docker/{{ item.name }}/docker-compose.yaml"
+      loop:
+        - { name: "jellyfin", file: "jellyfin.yaml" }
+        - { name: "media-stack", file: "media-stack.yaml" }
+    - name: copy env files
+      copy:
+        src: "templates/env/{{ item.file }}"
+        dest: "/home/{{ ansible_user }}/docker/{{ item.name }}/.env"
+      loop:
+         - { name: "jellyfin", file: "jellyfin.env" }
+         - { name: "media-stack", file: "media-stack.env" }
+        
+    - name: run media containers
+      community.docker.docker_compose:
+        project_src: "/home/{{ ansible_user }}/docker/{{ item }}/"
+      loop:
+        - jellyfin
+        - media-stack
+      register: output
 
     - ansible.builtin.debug:
         var: output
 
     - ansible.builtin.assert:
-      that:
-        - "{{ item }}.state.running"
-      loop:
-        - sonarr
-        - radarr
-        - nzbget
-        - jellyseer
-        - bazarr
-        - prowlarr
+        that:
+          - "{{ item }}.state.running"
+        loop:
+          - sonarr
+          - radarr
+          - nzbget
+          - jellyseer
+          - bazarr
+          - prowlarr
+          - jellyfin

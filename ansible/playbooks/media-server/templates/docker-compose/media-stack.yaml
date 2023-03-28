@@ -1,0 +1,126 @@
+# Home Lab Media Stack
+
+# Use the following compose yaml https://gist.github.com/anonymous/66ff223656174fd39c76d6075d6535fd as a guide
+# and https://github.com/sebgl/htpc-download-box#installation-guide with instructions for something similar
+
+# Services
+# ---
+# Sonarr - Search for TV shows to download
+# Radarr - Search for movies to download
+# NZBGet - Usenet downloader
+# NZBHydra2 - Meta search application for NZB indexers
+# Prowlarr - Indexer manager/proxy built on the popular arr .net/reactjs base stack
+# Bazarr - Companion application to Sonarr and Radarr to manage and download subtitles based on your requirements
+# Jellyseerr - Application for managing requests for your media library. It is a fork of Overseerr built to bring support for Jellyfin & Emby media servers
+#---
+
+# Guides
+# How to set up paths for hardlinks in Docker - https://trash-guides.info/Hardlinks/How-to-setup-for/Docker/
+# Planning paths and passing to container - https://wiki.servarr.com/docker-guide#Consistent_and_well_planned_paths
+# hardlink examples - https://trash-guides.info/Hardlinks/Examples/
+
+
+version: "2.1"
+services:
+  # Sonarr
+  # https://docs.linuxserver.io/images/docker-sonarr
+  # https://sonarr.tv/#downloads-v3-docker
+  sonarr:
+    image: lscr.io/linuxserver/sonarr:latest
+    container_name: sonarr
+    env_file:
+      - .env
+    volumes:
+      - /etc/localtime:/etc/localtime:ro
+      - ./sonarr/config:/config
+      - ${DATA_ROOT}:/data2
+    ports:
+      - 8989:8989
+    restart: unless-stopped
+
+  # Radarr
+  # https://docs.linuxserver.io/images/docker-radarr
+  # https://radarr.video/#downloads-v3-docker
+  radarr:
+    image: lscr.io/linuxserver/radarr:latest
+    container_name: radarr
+    env_file:
+      - .env
+    volumes:
+      - /etc/localtime:/etc/localtime:ro
+      - ./radarr/config:/config
+      - ${DATA_ROOT}:/data2
+    ports:
+      - 7878:7878
+    restart: unless-stopped
+
+  # NZBGet
+  # https://docs.linuxserver.io/images/docker-nzbget#linuxserver-nzbget
+  nzbget:
+    image: lscr.io/linuxserver/nzbget:latest
+    container_name: nzbget
+    env_file:
+      - .env
+    volumes:
+      - ./nzbget/config:/config
+      - ${USENET_ROOT}:/data2/usenet
+    ports:
+      - 6789:6789
+    restart: unless-stopped
+
+  # NZBHydra2
+  # https://docs.linuxserver.io/images/docker-nzbhydra2
+  # nzbhydra2:
+  #   image: lscr.io/linuxserver/nzbhydra2:latest
+  #   container_name: nzbhydra2
+  #   env_file:
+  #     - .env
+  #   volumes:
+  #     - ./nzbhydra/config:/config
+  #     - ${USENET_ROOT}:/data/usenet
+  #   ports:
+  #     - 5076:5076
+  #   restart: unless-stopped
+
+  # Prowlarr
+  # https://hub.docker.com/r/linuxserver/prowlarr
+  prowlarr:
+    image: lscr.io/linuxserver/prowlarr:develop
+    container_name: prowlarr
+    env_file:
+      - .env
+    volumes:
+      - ./prowlarr/config:/config
+    ports:
+      - 9696:9696
+    restart: unless-stopped
+
+  # Bazarr
+  # https://docs.linuxserver.io/images/docker-bazarr#linuxserver-bazarr
+  # https://wiki.bazarr.media/
+  bazarr:
+    image: lscr.io/linuxserver/bazarr:latest
+    container_name: bazarr
+    env_file:
+      - .env
+    volumes:
+      - ./bazarr/config:/config
+    ports:
+      - 6767:6767
+    restart: unless-stopped
+
+  # Jellyseerr
+  # https://hub.docker.com/r/fallenbagel/jellyseerr
+  # https://github.com/fallenbagel/jellyseerr
+  jellyseerr:
+      image: fallenbagel/jellyseerr:latest
+      container_name: jellyseerr
+      env_file:
+        - .env
+      environment:
+          - LOG_LEVEL=debug
+      ports:
+          - 5055:5055
+      volumes:
+          - ./jellyseerr/config:/app/config
+      restart: unless-stopped
