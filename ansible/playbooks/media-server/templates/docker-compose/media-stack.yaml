@@ -124,3 +124,31 @@ services:
       volumes:
           - ./jellyseerr/config:/app/config
       restart: unless-stopped
+
+  readarr-ebooks:
+    container_name: readarr-ebooks
+    image: cr.hotio.dev/hotio/readarr
+    env_file:
+      - .env
+    ports:
+      - "8787:8787"
+    environment:
+      - UMASK=002
+    volumes:
+      - /etc/localtime:/etc/localtime:ro
+      - ./readarr-ebooks/config:/config
+      - ${DATA_ROOT}:/data2
+
+  readarr-audiobooks:
+    container_name: readarr-audiobooks
+    image: cr.hotio.dev/hotio/readarr
+    env_file:
+      - .env
+    ports:
+      - "8788:8787"
+    environment:
+      - UMASK=002
+    volumes:
+      - /etc/localtime:/etc/localtime:ro
+      - ./readarr-audiobooks/config:/config
+      - ${DATA_ROOT}:/data2
