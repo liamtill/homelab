@@ -152,3 +152,15 @@ services:
       - /etc/localtime:/etc/localtime:ro
       - ./readarr-audiobooks/config:/config
       - ${DATA_ROOT}:/data2
+
+  audiobookshelf:
+    image: ghcr.io/advplyr/audiobookshelf:latest
+    container_name: audiobookshelf
+    ports:
+      - 8789:80
+    volumes:
+      - ${DATA_ROOT}/books/audiobooks:/audiobooks
+      - ${DATA_ROOT}/books/books:/books # experimental
+      # - </path/to/podcasts>:/podcasts
+      - ./audiobookshelf/config:/config
+      - ./audiobookshelf/metadata:/metadata
