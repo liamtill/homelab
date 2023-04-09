@@ -12,6 +12,8 @@
 # Prowlarr - Indexer manager/proxy built on the popular arr .net/reactjs base stack
 # Bazarr - Companion application to Sonarr and Radarr to manage and download subtitles based on your requirements
 # Jellyseerr - Application for managing requests for your media library. It is a fork of Overseerr built to bring support for Jellyfin & Emby media servers
+# Readarr - Ebooks and Audiobooks - separate instances
+# Audiobookshelf - Audio book server and library
 #---
 
 # Guides
@@ -128,6 +130,7 @@ services:
   readarr-ebooks:
     container_name: readarr-ebooks
     image: cr.hotio.dev/hotio/readarr
+    restart: unless-stopped
     env_file:
       - .env
     ports:
@@ -142,6 +145,7 @@ services:
   readarr-audiobooks:
     container_name: readarr-audiobooks
     image: cr.hotio.dev/hotio/readarr
+    restart: unless-stopped
     env_file:
       - .env
     ports:
@@ -156,11 +160,12 @@ services:
   audiobookshelf:
     image: ghcr.io/advplyr/audiobookshelf:latest
     container_name: audiobookshelf
+    restart: unless-stopped
     ports:
       - 8789:80
     volumes:
-      - ${DATA_ROOT}/books/audiobooks:/audiobooks
-      - ${DATA_ROOT}/books/books:/books # experimental
+      - ${MEDIA_ROOT}/books/audiobooks:/audiobooks
+      - ${MEDIA_ROOT}/books/books:/books # experimental
       # - </path/to/podcasts>:/podcasts
       - ./audiobookshelf/config:/config
       - ./audiobookshelf/metadata:/metadata
