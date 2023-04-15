@@ -1,0 +1,51 @@
+---
+# tasks file for roles/wordpress
+# - name: Install acl
+#   become: true
+#   apt:
+#     state: latest
+#     update_cache: true
+#     pkg:
+#       - acl
+# - name: create wordpress user
+#   become: yes
+#   ansible.builtin.user:
+#     name: wordpress
+#     password: "{{ wordpress_user_pass }}"
+#     uid: 1001 # for bitnami container
+# - name: add to docker group after docker role config done
+#   become: yes
+#   ansible.builtin.user:
+#     name: wordpress
+#     groups: docker
+#     append: yes
+
+- name: Get users home
+  user:
+    name: "{{ ansible_user }}"
+    state: present
+  register: user_home
+- name: create site directory
+  file:
+    path: "{{ user_home.home }}/{{ site_name }}"
+    state: directory
+- name: create required directories
+  file:
+    path: "{{ user_home.home }}/{{site_name}}/{{ item }}"
+    state: directory
+  loop:
+    - db_data
+    - wordpress_data
+- name: copy compose file from template
+  template:
+    src: files/docker-compose.j2
+    dest: "{{ user_home.home }}/{{ site_name }}/docker-compose.yaml"
+
+- name: run wordpress stack
+  community.docker.docker_compose:
+    project_src: "{{ user_home.home }}/{{ site_name }}"
+    restarted: true
+  register: output
+
+- ansible.builtin.debug:
+    var: output

@@ -1,0 +1,55 @@
+---
+
+- hosts: totoscrafts
+  vars_files: 
+    # Import tunnel variables into the VM
+    - ../../../terraform/totoscrafts/tf_ansible_vars_file.yml
+  roles:
+    - base   
+    - user
+    - docker
+    - wordpress
+
+  tasks:
+    - name: Download the cloudflared Linux package
+      shell: wget https://github.com/cloudflare/cloudflared/releases/latest/download/cloudflared-linux-amd64.deb
+    - name: Depackage cloudflared
+      become: yes
+      shell: sudo dpkg -i cloudflared-linux-amd64.deb
+    - name: Create a cloudflared service directory
+      become: yes
+      shell: mkdir -p /etc/cloudflared/
+    - name: Create the config file for cloudflared and define the ingress rules for the tunnel
+      become: yes
+      copy:
+        dest: "/etc/cloudflared/config.yml"
+        content: |
+          tunnel: "{{ tunnel_id }}"
+          credentials-file: /etc/cloudflared/cert.json
+          logfile: /var/log/cloudflared.log
+          loglevel: info
+          ingress:
+            - hostname: "*.totoscrafts.com"
+              service: https://127.0.0.1
+            - service: http_status:404
+    - name: Create the tunnel credentials file for cloudflared.
+      become: yes
+      copy:
+        dest: "/etc/cloudflared/cert.json"
+        content: |
+          {
+            "AccountTag"   : "{{ account | quote }}",
+            "TunnelID"     : "{{ tunnel_id | quote }}",
+            "TunnelName"   : "{{ tunnel_name | quote }}",
+            "TunnelSecret" : "{{ secret | quote }}"
+          }
+    - name: Install the tunnel as a systemd service.
+      become: yes
+      shell: cloudflared service install
+    - name: Start the tunnel
+      become: yes
+      systemd:
+        name: cloudflared
+        state: started
+        enabled: true
+        masked: no
