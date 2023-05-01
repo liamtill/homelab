@@ -3,6 +3,7 @@ services:
   db:
     image: mysql:8.0
     command: --default-authentication-plugin=mysql_native_password
+    restart: unless-stopped
     volumes:
       - ./db_data:/var/lib/mysql
     environment:
@@ -12,6 +13,7 @@ services:
       MYSQL_PASSWORD: {{ MYSQL_PASSWORD }}
   wordpress:
     image: wordpress
+    restart: unless-stopped
     ports:
       - 80:80
     volumes:
