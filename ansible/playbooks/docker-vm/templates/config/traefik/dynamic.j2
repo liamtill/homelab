@@ -1,0 +1,229 @@
+http:
+  services:
+    jellyfin:
+      loadBalancer:
+        servers:
+          - url: "{{ media_ip }}:8096"
+        passHostHeader: true
+    jellyseer:
+      loadBalancer:
+        servers:
+          - url: "{{ media_ip }}:5055"
+        passHostHeader: true
+    bazarr:
+      loadBalancer:
+        servers:
+          - url: "{{ media_ip }}:6767"
+        passHostHeader: true
+    movies:
+      loadBalancer:
+        servers:
+          - url: "{{ media_ip }}:7878"
+        passHostHeader: true
+    nzbget:
+      loadBalancer:
+        servers:
+          - url: "{{ media_ip }}:6789"
+        passHostHeader: true
+    omv:
+      loadBalancer:
+        servers:
+          - url: "{{ omv_ip }}:80"
+        passHostHeader: true
+    prowlarr:
+      loadBalancer:
+        servers:
+          - url: "{{ media_ip }}:9696"
+        passHostHeader: true
+    tv:
+      loadBalancer:
+        servers:
+          - url: "{{ media_ip }}:8989"
+        passHostHeader: true
+    books:
+      loadBalancer:
+        servers:
+          - url: "{{ media_ip }}:8787"
+        passHostHeader: true
+    audiobooks:
+      loadBalancer:
+        servers:
+          - url: "{{ media_ip }}:8788"
+        passHostHeader: true
+    audiobookshelf:
+       loadBalancer:
+        servers:
+          - url: "{{ media_ip }}:8789"
+        passHostHeader: true
+    uptime:
+      loadBalancer:
+        servers:
+          - url: "{{ uptime_ip }}:3001"
+        passHostHeader: true
+    proxmox:
+      loadBalancer:
+        servers:
+          - url: "{{ proxmox_ip }}"
+        passHostHeader: true
+    pbs:
+      loadBalancer:
+        servers:
+          - url: "{{ pbs_ip }}"
+        passHostHeader: true
+    pihole:
+      loadBalancer:
+        servers: 
+          - url: "{{ pihole_ip }}"
+        passHostHeader: true
+
+  routers:
+    jellyfin:
+      rule: "Host(`{{ jellyfin }}`)"
+      service: jellyfin
+      middlewares:
+        - default-headers
+        - https-redirectScheme
+      tls: {}
+    jellyseer:
+      rule: "Host(`{{ jellyseer }}`)"
+      service: jellyseer
+      middlewares:
+        - default-headers
+        - https-redirectScheme
+      tls: {}
+    bazarr:
+      rule: "Host(`{{ bazarr }}`)"
+      service: bazarr
+      middlewares:
+        - default-headers
+        - https-redirectScheme
+      tls: {}
+    movies:
+      rule: "Host(`{{ movies }}`)"
+      service: movies
+      middlewares:
+        - default-headers
+        - https-redirectScheme
+      tls: {}
+    nzbget:
+      rule: "Host(`{{ nzbget }}`)"
+      service: nzbget
+      middlewares:
+        - default-headers
+        - https-redirectScheme
+      tls: {}
+    omv:
+      entryPoints:
+        - "https"
+      rule: "Host(`{{ omv }}`)"
+      middlewares:
+        - default-headers
+        - https-redirectScheme
+      tls: {}
+      service: omv
+    prowlarr:
+      rule: "Host(`{{ prowlarr }}`)"
+      service: prowlarr
+      middlewares:
+        - default-headers
+        - https-redirectScheme
+      tls: {}
+    tv:
+      rule: "Host(`{{ tv }}`)"
+      service: tv
+      middlewares:
+        - default-headers
+        - https-redirectScheme
+      tls: {}
+    books:
+      rule: "Host(`{{ books }}`)"
+      service: books
+      middlewares:
+        - default-headers
+        - https-redirectScheme
+      tls: {}
+    audiobooks:
+      rule: "Host(`{{ audiobooks }}`)"
+      service: audiobooks
+      middlewares:
+        - default-headers
+        - https-redirectScheme
+      tls: {}
+    audiobookshelf:
+      rule: "Host(`{{ audiobookshelf }}`)"
+      service: audiobookshelf
+      middlewares:
+        - default-headers
+        - https-redirectScheme
+      tls: {}
+    uptime:
+      rule: "Host(`{{ uptime }}`)"
+      service: uptime
+      middlewares:
+        - default-headers
+        - https-redirectScheme
+      tls: {}
+    proxmox:
+      entryPoints:
+        - "https"
+      rule: "Host(`{{ proxmox }}`)"
+      middlewares:
+        - default-headers
+        - https-redirectScheme
+      tls: {}
+      service: proxmox
+    pbs:
+      entryPoints:
+        - "https"
+      rule: "Host(`{{ pbs }}`)"
+      middlewares:
+        - default-headers
+        - https-redirectScheme
+      tls: {}
+      service: pbs
+    pihole:
+      entryPoints:
+        - "https"
+      rule: "Host(`{{ pihole }}`)"
+      middlewares:
+        - default-headers
+        - https-redirectScheme
+        - addprefix-pihole
+      tls: {}
+      service: pihole
+
+  middlewares:
+      addprefix-pihole:
+        addPrefix:
+          prefix: "/admin"
+          
+      https-redirectScheme:
+        redirectScheme:
+          scheme: https
+          permanent: true
+
+      default-headers:
+        headers:
+          frameDeny: true
+          browserXssFilter: true
+          contentTypeNosniff: true
+          forceSTSHeader: true
+          stsIncludeSubdomains: true
+          stsPreload: true
+          stsSeconds: 15552000
+          customFrameOptionsValue: SAMEORIGIN
+          customRequestHeaders:
+            X-Forwarded-Proto: https
+
+      default-whitelist:
+        ipWhiteList:
+          sourceRange:
+          - "10.0.0.0/8"
+          - "192.168.0.0/16"
+          - "172.16.0.0/12"
+
+      secured:
+        chain:
+          middlewares:
+          - default-whitelist
+          - default-headers

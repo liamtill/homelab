@@ -1,0 +1,52 @@
+version: '3'
+
+services:
+  traefik:
+    # The official Traefik docker image
+    image: traefik:v2.9
+    container_name: traefik
+    restart: unless-stopped
+    # Enables the web UI and tells Traefik to listen to docker
+    # can also set in traefik.yml
+    # command: --api.insecure=true --providers.docker
+    security_opt:
+      - no-new-privileges:true
+    networks:
+      - proxy
+    ports:
+      # The HTTP port
+      - "80:80"
+      # The Web UI (enabled by --api.insecure=true)
+      - "8080:8080"
+      # HTTPS
+      - 443:443
+    environment:
+      #- CF_API_EMAIL={{ cloudflare_username }}
+      - CF_DNS_API_TOKEN={{ cloudflare_api_token }}
+      #- CF_API_KEY={{ cloudflare_api_key }}
+    volumes:
+      - /etc/localtime:/etc/localtime:ro
+      # So that Traefik can listen to the Docker events
+      - /var/run/docker.sock:/var/run/docker.sock:ro
+      - ./dynamic.yml:/etc/traefik/dynamic.yml:ro
+      - ./traefik.yml:/etc/traefik/traefik.yml:ro
+      - ./data/acme.json:/etc/traefik/acme.json
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.traefik.entrypoints=http"
+      - "traefik.http.routers.traefik.rule=Host(`{{ traefik_uri }}`)" # traefik-dashboard.local.example.com
+      - "traefik.http.middlewares.traefik-https-redirect.redirectscheme.scheme=https"
+      - "traefik.http.middlewares.sslheader.headers.customrequestheaders.X-Forwarded-Proto=https"
+      - "traefik.http.routers.traefik.middlewares=traefik-https-redirect"
+      - "traefik.http.routers.traefik-secure.entrypoints=https"
+      - "traefik.http.routers.traefik-secure.rule=Host(`{{ traefik_uri }}`)" # traefik-dashboard.local.example.com
+     # - "traefik.http.routers.traefik-secure.middlewares=traefik-auth" # add basic auth, must create user:pass
+      - "traefik.http.routers.traefik-secure.tls=true"
+      - "traefik.http.routers.traefik-secure.tls.certresolver=cloudflare"
+      - "traefik.http.routers.traefik-secure.tls.domains[0].main={{ sub_domain }}" # local.example.com
+      - "traefik.http.routers.traefik-secure.tls.domains[0].sans=*.{{ sub_domain }}" # *.local.example.com
+      - "traefik.http.routers.traefik-secure.service=api@internal"
+
+networks:
+  proxy:
+    external: true

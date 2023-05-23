@@ -5,8 +5,6 @@
     - docker
     - deploy_watchtower
     - rclone
-  # vars_files:
-  #   - host_vars/docker-vm.yaml
   tasks:
 
     # install pymysql dependency on host
@@ -15,56 +13,76 @@
       apt:
         name: python3-pymysql
 
+    # need to make sure this proxy network exists first, before running compose files
+    - name: Create proxy network for traefik and containers
+      community.docker.docker_network:
+        name: proxy
+
     # setup bookstack
     - name: setup bookstack
       import_tasks: setup-bookstack.yaml
 
-    # ignoring stderr for those that do not exist
-    - name: get backed up docker containers
-      shell: rclone sync mega:/backup/docker/{{ item }} /home/{{ ansible_user }}/docker/{{ item }} 2>/dev/null
+    - name: creating required directories
+      file:
+        path: "/home/{{ ansible_user }}/docker/{{ item }}"
+        state: directory
       loop:
-        - syncthing
-    - name: run restored docker containers
-      community.docker.docker_compose:
-        project_src: '/home/{{ ansible_user }}/docker/{{ item }}'
-        files:
-        - docker-compose.yaml
-        loop:
           - syncthing
-        register: output
-
-    - ansible.builtin.debug:
-        var: output
-
-    - ansible.builtin.assert:
-        that:
-          - "{{ item }}.state.running"
-        loop:
-          - syncthing
+          - syncthing/data
+          - portainer
+          - portainer/data
+          - adminer
+          - pgadmin
+          - paperless-ng
+          - paperless-ng/data
+          - paperless-ng/media
+          - paperless-ng/export
+          - paperless-ng/consume
 
     - name: copy docker compose files
-      copy:
-        src: "compose-files/{{ item.file }}"
+      template:
+        src: "templates/docker-compose/{{ item.file }}"
         dest: "/home/{{ ansible_user }}/docker/{{ item.name }}/docker-compose.yaml"
       loop:
-        - { name: "portainer", file: "portainer.yaml" }
-        - { name: "adminer", file: "adminer.yaml"}
+        - { name: "portainer", file: "portainer.j2" }
+        - { name: "adminer", file: "adminer.j2" }
+        - { name: "pgadmin", file: "pgadmin.j2" }
+        - { name: "syncthing", file: "syncthing.j2" }
+        - { name: "paperless-ng", file: "paperless-ng.j2" }
+
+    - name: copy env files
+      copy:
+        src: "templates/env/{{ item.file }}"
+        dest: "/home/{{ ansible_user }}/docker/{{ item.name }}/.env"
+      loop:
+         - { name: "syncthing", file: "syncthing.env" }
+
+    - name: copy pgadmin env file
+      template:
+        src: templates/env/pgadmin.j2
+        dest: /home/{{ ansible_user }}/docker/pgadmin/.env
+
+    - name: copy paperless-ngx env file
+      template:
+        src: templates/env/paperless-ng.j2
+        dest: /home/{{ ansible_user }}/docker/paperless-ng/.env
+
+    - name: setup traefik
+      import_tasks: setup-traefik.yaml
+
     - name: run containers
       community.docker.docker_compose:
         project_src: "/home/{{ ansible_user }}/docker/{{ item }}"
+        restarted: true
         files:
-        - docker-compose.yaml
-        loop:
-          - portainer
-          - adminer
-        register: output
+          - docker-compose.yaml
+      loop:
+        - portainer
+        - adminer
+        - pgadmin
+        - syncthing
+        - paperless-ng
+      register: output
 
     - ansible.builtin.debug:
         var: output
-
-    - ansible.builtin.assert:
-        that:
-          - "{{ item }}.state.running"
-        loop:
-          - portainer
-          - adminer

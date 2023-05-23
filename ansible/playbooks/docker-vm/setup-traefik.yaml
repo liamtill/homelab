@@ -1,0 +1,45 @@
+# playbook to provision traefik
+
+- name: create required directores
+  file:
+    path: "/home/{{ ansible_user }}/docker/{{ item }}"
+    state: directory
+  loop:
+    - traefik
+    - traefik/data
+
+- name: copy docker compose file
+  template:
+    src: templates/docker-compose/traefik.j2
+    dest: "/home/{{ ansible_user }}/docker/traefik/docker-compose.yaml"
+
+- name: copy traefik.yml config
+  template:
+    src: templates/config/traefik/traefik.j2
+    dest: "/home/{{ ansible_user }}/docker/traefik/traefik.yml"
+
+- name: copy dynamic.yml config using template
+  template:
+    src: templates/config/traefik/dynamic.j2
+    dest: "/home/{{ ansible_user }}/docker/traefik/dynamic.yml"
+
+- name: create acme.json file for certs
+  file:
+    path: "/home/{{ ansible_user }}/docker/traefik/data/acme.json"
+    state: touch
+    mode: '0600'
+
+- name: start traefik container
+  community.docker.docker_compose:
+    project_src: /home/{{ ansible_user }}/docker/traefik
+    restarted: true
+    files:
+      - docker-compose.yaml
+  register: output
+
+- debug:
+    var: output
+
+# - assert:
+#     that:
+#       - traefik.state.running

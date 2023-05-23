@@ -4,8 +4,9 @@
 # create db user
 - name: create bookstack user
   community.mysql.mysql_user:
-    login_user: root
-    login_password: "{{ mysql_root_password }}"
+    login_user: "{{ mysql_user_name }}"
+    login_password: "{{ mysql_user_password }}"
+    login_host: "{{ mysql_host }}"
     name: "{{ bookstack_db_user }}"
     host: '%'
     password: "{{ bookstack_db_password }}"
@@ -23,30 +24,36 @@
 # copy compose and env using template
 - name: copy env file
   template:
-    src: playbooks/docker-vm/templates/env/bookstack.j2
+    src: templates/env/bookstack.j2
     dest: /home/{{ ansible_user }}/docker/bookstack/.env
 - name: copy compose file
-  copy: 
-    src:  playbooks/docker-vm/templates/docker-compose/bookstack.yaml
+  template: 
+    src:  templates/docker-compose/bookstack.j2
     dest: /home/{{ ansible_user }}/docker/bookstack/docker-compose.yaml
 
 # get static data from mega backup
 # ignore stderr if not exist
-- name: restore static data from mega
-  shell: rclone copy mega:/backup/docker/bookstack/data/ /home/{{ ansible_user }}/docker/bookstack/data 2>/dev/null
+# - name: restore static data from mega
+#   shell: rclone copy mega:/backup/docker/bookstack/data/ /home/{{ ansible_user }}/docker/bookstack/data 2>/dev/null
 
 # start container
 - name: start bookstack container
   community.docker.docker_compose:
     project_src: /home/{{ ansible_user }}/docker/bookstack
+    restarted: true
     files:
-      - docker.compose.yaml
-    register: output
+      - docker-compose.yaml
+  register: output
 
 - debug:
     var: output
 
-- assert:
-    that:
-      - bookstack.state.running
+# - name: Sleep for 5 seconds and continue with play
+#   ansible.builtin.wait_for:
+#     timeout: 5
+#   delegate_to: localhost
+
+# - assert:
+#     that:
+#       - bookstack.state.running
     
