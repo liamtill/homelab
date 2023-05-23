@@ -41,8 +41,6 @@ resource "proxmox_vm_qemu" "docker" {
         ssd = 1
     }
 
-    # ipconfig0 = "gw=192.168.1.1"
-    # nameserver = "192.168.1.1"
 
     lifecycle {
     ignore_changes  = [
@@ -50,18 +48,9 @@ resource "proxmox_vm_qemu" "docker" {
     ]
   }
 
-
-  # machine ip
-  # provisioner "remote-exec" {
-  #   inline = [
-  #     "ip a"
-  #   ]
-  # }
-
-  # local commands, will use to run ansible plaaybooks for config
-  #provisioner "local-exec" {
-    #command = ""
-  #}
+  provisioner "local-exec" {
+    command = "echo ${self.default_ipv4_address}"
+  }
 
 }
 
