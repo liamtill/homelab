@@ -45,8 +45,12 @@ all:
           ansible_host: 192.168.1.187
         totoscrafts:
           ansible_host: 192.168.1.124
-    oci:
-      vars:
-        ansible_user: ubuntu
+    pis:
       hosts:
-        lorenz:
+        stratus:
+          ansible_host: 192.168.1.207
+    # oci:
+    #   vars:
+    #     ansible_user: ubuntu
+    #   hosts:
+    #     lorenz:

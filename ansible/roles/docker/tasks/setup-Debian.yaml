@@ -4,8 +4,14 @@
     url: https://download.docker.com/linux/debian/gpg
     keyring: /etc/apt/keyrings/docker.gpg
     state: present
+- name: Get DEB architecture
+  shell: dpkg --print-architecture
+  register: deb_architecture
+- name: Print DEB architecture
+  debug:
+    msg: "deb_architecture.stdout: {{ deb_architecture.stdout }}"
 - name: add to sources
   become: yes
   apt_repository:
-    repo: "deb [arch=amd64 signed-by=/etc/apt/keyrings/docker.gpg] https://download.docker.com/linux/debian {{ ansible_distribution_release }} stable"
+    repo: "deb [arch={{ deb_architecture.stdout }} signed-by=/etc/apt/keyrings/docker.gpg] https://download.docker.com/linux/debian {{ ansible_distribution_release }} stable"
     state: present

@@ -1,2 +1,4 @@
 ---
 # defaults file for roles/base
+is_pve_vm: true
+is_pi: true
