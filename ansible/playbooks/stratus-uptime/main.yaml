@@ -1,0 +1,46 @@
+- hosts: stratus
+  roles:
+    - base
+    - user
+    - docker
+    - deploy_watchtower
+
+  tasks:
+
+    - name: Deploy uptime-kuma
+      include_role:
+        name: roles/uptime-kuma
+
+    # Could automate config of Uptime Kuma using lucasheld.uptime_kuma to setup login, add notification and add monitors
+    # - name: Login with credentials once and register the result
+    #   lucasheld.uptime_kuma.login:
+    #     api_url: {{ uptime }}
+    #     api_username: {{ uptime_username }}
+    #     api_password: {{ uptime_password }}
+    #   register: result
+
+    # - name: Extract the token from the result and set it as fact
+    #   set_fact:
+    #     api_token: "{{ result.token }}"
+
+    # - name: add slack notification
+    #   lucasheld.uptime_kuma.notification:
+    #     api_url: {{ uptime }}
+    #     api_token: "{{ result.token }}"
+    #     name: Slack
+    #     type: slack
+    #     isDefault: true
+    #     applyExisting: false
+    #     slackWebhookURL: {{ uptime_slack_webhook }}
+    #     slackChannel: "#uptime"
+    #     slackUsername: "uptime"
+    #     state: present
+
+    # - name: Add test monitor
+    #   lucasheld.uptime_kuma.monitor:
+    #     api_url: {{ proxmox }}
+    #     api_token: "{{ api_token }}"
+    #     name: test
+    #     type: https
+    #     url: "https://127.0.0.1"
+    #     state: present
