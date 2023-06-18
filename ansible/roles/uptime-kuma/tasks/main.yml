@@ -1,0 +1,27 @@
+---
+# tasks file for roles/uptime-kuma
+
+- name: creating required directories
+  file:
+    path: "/home/{{ ansible_user }}/docker/{{ item }}"
+    state: directory
+  loop:
+    - uptime-kuma
+    - uptime-kuma/data
+
+- name: copy compose file
+  copy:
+    src: files/{{ item }}
+    dest: "/home/{{ ansible_user }}/docker/uptime-kuma/{{ item }}"
+  loop:
+    - docker-compose.yaml
+
+- name: run uptime-kuma container
+  community.docker.docker_compose:
+    project_src: "/home/{{ ansible_user }}/docker/uptime-kuma"
+    files:
+      - docker-compose.yaml
+  register: output
+
+- ansible.builtin.debug:
+    var: output
