@@ -27,6 +27,8 @@ resource "proxmox_vm_qemu" "totoscrafts" {
     boot = "cdn"
     onboot = "true"
 
+    ipconfig0 = "ip=dhcp,ip6=dhcp"
+
     # define network hw
     network {
       bridge = "vmbr0"

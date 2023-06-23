@@ -1,11 +1,11 @@
-resource "proxmox_vm_qemu" "ubuntu-server" {
+resource "proxmox_vm_qemu" "docker" {
 
     # pve node
     target_node = "nimbus-pve"
 
     # define machine name
-    name = "ubuntu-server"
-    desc = "Ubuntu Server 20.04"
+    name = "docker"
+    desc = "Docker VM"
     
     # enable the qemu-guest-agent
     agent = 1
@@ -17,13 +17,16 @@ resource "proxmox_vm_qemu" "ubuntu-server" {
 
     # vm settings
     os_type = "cloud-init"
-    cores = 1
+    cores = 2
     sockets = 1
     cpu = "host"
-    memory = 1024
+    memory = 2048
     scsihw = "virtio-scsi-pci"
     bootdisk = "scsi0"
     boot = "cdn"
+    onboot = "true"
+
+    ipconfig0 = "ip=dhcp,ip6=dhcp"
 
     # define network hw
     network {
@@ -35,13 +38,11 @@ resource "proxmox_vm_qemu" "ubuntu-server" {
     disk {
         storage = "local-lvm"
         type = "scsi"
-        size = "32G"
+        size = "64G"
         # enable ssd emulation
         ssd = 1
     }
 
-    # ipconfig0 = "gw=192.168.1.1"
-    # nameserver = "192.168.1.1"
 
     lifecycle {
     ignore_changes  = [
@@ -49,10 +50,9 @@ resource "proxmox_vm_qemu" "ubuntu-server" {
     ]
   }
 
-  # local commands, will use to run ansible plaaybooks for config
-  #provisioner "local-exec" {
-    #command = ""
-  #}
+  provisioner "local-exec" {
+    command = "echo ${self.default_ipv4_address}"
+  }
 
 }
 

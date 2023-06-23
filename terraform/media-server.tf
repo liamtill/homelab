@@ -1,11 +1,11 @@
-resource "proxmox_vm_qemu" "docker" {
+resource "proxmox_vm_qemu" "media" {
 
     # pve node
     target_node = "nimbus-pve"
 
     # define machine name
-    name = "docker"
-    desc = "Docker VM"
+    name = "media"
+    desc = "Media Server"
     
     # enable the qemu-guest-agent
     agent = 1
@@ -17,7 +17,7 @@ resource "proxmox_vm_qemu" "docker" {
 
     # vm settings
     os_type = "cloud-init"
-    cores = 2
+    cores = 4
     sockets = 1
     cpu = "host"
     memory = 2048
@@ -25,6 +25,8 @@ resource "proxmox_vm_qemu" "docker" {
     bootdisk = "scsi0"
     boot = "cdn"
     onboot = "true"
+
+    ipconfig0 = "ip=dhcp,ip6=dhcp"
 
     # define network hw
     network {
@@ -36,11 +38,10 @@ resource "proxmox_vm_qemu" "docker" {
     disk {
         storage = "local-lvm"
         type = "scsi"
-        size = "64G"
+        size = "32G"
         # enable ssd emulation
         ssd = 1
     }
-
 
     lifecycle {
     ignore_changes  = [
@@ -48,9 +49,11 @@ resource "proxmox_vm_qemu" "docker" {
     ]
   }
 
-  provisioner "local-exec" {
-    command = "echo ${self.default_ipv4_address}"
-  }
+
+  # local commands, will use to run ansible plaaybooks for config
+  #provisioner "local-exec" {
+    #command = ""
+  #}
 
 }
 

@@ -2,6 +2,7 @@ resource "proxmox_vm_qemu" "dev-vm" {
 
     # pve node
     target_node = "nimbus-pve"
+    count=0
 
     # define machine name
     name = "dev-vm"
@@ -39,9 +40,6 @@ resource "proxmox_vm_qemu" "dev-vm" {
         # enable ssd emulation
         ssd = 1
     }
-
-    # ipconfig0 = "gw=192.168.1.1"
-    # nameserver = "192.168.1.1"
 
     lifecycle {
     ignore_changes  = [

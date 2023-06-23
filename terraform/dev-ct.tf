@@ -1,31 +1,26 @@
-resource "proxmox_lxc" "mysql-server" {
+resource "proxmox_lxc" "dev-ct" {
 
     # pve node
     target_node = "nimbus-pve"
+    count=0
 
     # define machine name
-    hostname = "mysql"
-    description = "MySQL Server"
+    hostname = "dev-ct"
+    description = "dev container"
     # template is unprivileged so no need to set option
     ostemplate = "local:vztmpl/ubuntu-20.04-standard_20.04-1_amd64.tar.gz"
     unprivileged = "true"
     password = var.container_password
     ssh_public_keys = var.ssh_public_key
 
-    # ct id to clone
-    # clone = "6000"
-    # full clone
-    # full = "true"
-    # start after creation
+       # start after creation
     start = "true"
     # start on boot
     onboot = "true"
 
     # ct settings
-    # clone_storage = "local-lvm"
-    cores = 2
-    memory = 2048
-    #swap = 2048
+    cores = 1
+    memory = 1024
 
     # define network
     network {
@@ -37,9 +32,8 @@ resource "proxmox_lxc" "mysql-server" {
     # define root fs
     rootfs {
       storage = "local-lvm"
-      size    = "32G"
+      size    = "8G"
     }
-
 
 }
 

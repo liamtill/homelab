@@ -12,20 +12,14 @@ resource "proxmox_lxc" "postgres-server" {
     password = var.container_password
     ssh_public_keys = var.ssh_public_key
 
-    # ct id to clone
-    # clone = "6000"
-    # full clone
-    # full = "true"
     # start after creation
     start = "true"
     # start on boot
     onboot = "true"
 
     # ct settings
-    # clone_storage = "local-lvm"
     cores = 2
     memory = 2048
-    #swap = 2048
 
     # define network
     network {

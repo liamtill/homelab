@@ -1,22 +1,31 @@
 terraform {
 
+    cloud {
+        organization = "liamtill"
+
+        workspaces {
+            name = "homelab"
+        }
+    }
+
     required_version = ">= 0.13.0"
 
     required_providers {
         proxmox = {
             source = "Telmate/proxmox"
             version = "2.9.11"
-            }
+            }  
+
         cloudflare = {
             source = "cloudflare/cloudflare"
         }
+        
         random = {
             source = "hashicorp/random"
         }
-    }   
+    }
 }
 
-# proxmox variables
 variable "proxmox_api_url" {
     type = string
 }
@@ -41,7 +50,6 @@ variable "proxmox_user_password" {
     sensitive = true
 }
 
-# container variables
 variable "ssh_public_key" {
     type = string
     sensitive = true
@@ -79,7 +87,6 @@ variable "cloudflare_token" {
   description = "Cloudflare API token created at https://dash.cloudflare.com/profile/api-tokens"
   type        = string
 }
-
 
 provider "proxmox" {
     pm_api_url = var.proxmox_api_url
