@@ -3,7 +3,7 @@
 - hosts: totoscrafts
   vars_files: 
     # Import tunnel variables into the VM
-    - ../../../terraform/totoscrafts/tf_ansible_vars_file.yml
+    - ../../../terraform/totoscrafts/totoscrafts_tunnel_vars.yml
   roles:
     - base   
     - user
