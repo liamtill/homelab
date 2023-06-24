@@ -29,4 +29,4 @@ override.tf.json
 .terraformrc
 terraform.rc
 
-tf_ansible_vars_file.yml
+totoscrafts_tunnel_vars.yml

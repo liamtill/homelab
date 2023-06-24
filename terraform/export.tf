@@ -8,5 +8,5 @@ resource "local_file" "tf_ansible_vars_file" {
     zone: ${var.cloudflare_zone}
     DOC
 
-  filename = "./tf_ansible_vars_file.yml"
+  filename = "./totoscrafts_tunnel_vars.yml"
 }

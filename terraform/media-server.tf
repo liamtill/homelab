@@ -11,7 +11,7 @@ resource "proxmox_vm_qemu" "media" {
     agent = 1
 
     # vm template to clone from
-    clone = "ubuntu-cloud-20.04"
+    clone = var.vm_template
     # full clone instead of linked clone
     full_clone  = "true"
 

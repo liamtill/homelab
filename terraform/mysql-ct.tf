@@ -7,7 +7,7 @@ resource "proxmox_lxc" "mysql-server" {
     hostname = "mysql"
     description = "MySQL Server"
     # template is unprivileged so no need to set option
-    ostemplate = "local:vztmpl/ubuntu-20.04-standard_20.04-1_amd64.tar.gz"
+    ostemplate = var.ct_template
     unprivileged = "true"
     password = var.container_password
     ssh_public_keys = var.ssh_public_key
