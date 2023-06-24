@@ -1,11 +1,12 @@
-resource "proxmox_vm_qemu" "media" {
+resource "proxmox_vm_qemu" "proxmox-vm" {
 
     # pve node
-    target_node = "nimbus-pve"
+    target_node = var.target_node
+    count = var.vm_count
 
     # define machine name
-    name = "media"
-    desc = "Media Server"
+    name = var.vm_name
+    desc = var.vm_description
     
     # enable the qemu-guest-agent
     agent = 1
@@ -13,20 +14,17 @@ resource "proxmox_vm_qemu" "media" {
     # vm template to clone from
     clone = var.vm_template
     # full clone instead of linked clone
-    full_clone  = "true"
+    full_clone  = var.clone_type
 
     # vm settings
-    os_type = "cloud-init"
-    cores = 4
+    os_type = var.os_type
+    cores = var.num_cores
     sockets = 1
     cpu = "host"
-    memory = 4096
+    memory = var.memory
     scsihw = "virtio-scsi-pci"
     bootdisk = "scsi0"
     boot = "cdn"
-    onboot = "true"
-
-    ipconfig0 = "ip=dhcp,ip6=dhcp"
 
     # define network hw
     network {
@@ -36,9 +34,9 @@ resource "proxmox_vm_qemu" "media" {
 
     # define storage
     disk {
-        storage = "local-lvm"
+        storage = var.disk_storage
         type = "scsi"
-        size = "32G"
+        size = var.disk_size
         # enable ssd emulation
         ssd = 1
     }
@@ -49,11 +47,10 @@ resource "proxmox_vm_qemu" "media" {
     ]
   }
 
-
-  # local commands, will use to run ansible plaaybooks for config
-  #provisioner "local-exec" {
-    #command = ""
-  #}
+  # local commands, will use to run ansible playbooks for config
+provisioner "local-exec" {
+    command = "echo ${self.default_ipv4_address}"
+  }
 
 }
 

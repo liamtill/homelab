@@ -1,56 +1,15 @@
-resource "proxmox_vm_qemu" "dev-vm" {
+module "dev-vm" {
+  source = "./modules/proxmox-vm"
 
-    # pve node
-    target_node = "nimbus-pve"
-    count=0
+  vm_name = "dev-vm"
+  vm_description = "Dev VM"
+  vmid = 101
+  vm_count = 0
 
-    # define machine name
-    name = "dev-vm"
-    desc = "DEV Ubuntu Server 20.04"
-    
-    # enable the qemu-guest-agent
-    agent = 1
-
-    # vm template to clone from
-    clone = var.vm_template
-    # full clone instead of linked clone
-    full_clone  = "true"
-
-    # vm settings
-    os_type = "cloud-init"
-    cores = 1
-    sockets = 1
-    cpu = "host"
-    memory = 1024
-    scsihw = "virtio-scsi-pci"
-    bootdisk = "scsi0"
-    boot = "cdn"
-
-    # define network hw
-    network {
-      bridge = "vmbr0"
-      model = "virtio"
-    }
-
-    # define storage
-    disk {
-        storage = "local-lvm"
-        type = "scsi"
-        size = "8G"
-        # enable ssd emulation
-        ssd = 1
-    }
-
-    lifecycle {
-    ignore_changes  = [
-      network,
-    ]
-  }
-
-  # local commands, will use to run ansible plaaybooks for config
-  #provisioner "local-exec" {
-    #command = ""
-  #}
+  proxmox_api_url = var.proxmox_api_url
+  proxmox_api_token_id = var.proxmox_api_token_id
+  proxmox_user = var.proxmox_user
+  proxmox_user_password = var.proxmox_user_password
+  proxmox_api_token_secret = var.proxmox_api_token_secret
 
 }
-
