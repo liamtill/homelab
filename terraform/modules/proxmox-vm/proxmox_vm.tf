@@ -26,6 +26,8 @@ resource "proxmox_vm_qemu" "proxmox-vm" {
     bootdisk = "scsi0"
     boot = "cdn"
 
+    ipconfig0 = "ip=dhcp,ip6=dhcp"
+
     # define network hw
     network {
       bridge = "vmbr0"
