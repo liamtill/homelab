@@ -1,38 +1,22 @@
-resource "proxmox_lxc" "mysql-server" {
+module "mysql-server" {
+  source = "./modules/proxmox-ct"
 
-    # pve node
-    target_node = "nimbus-pve"
+  ct_name = "mysql"
+  ct_description = "MySQL Server"
+  ct_count = 1
 
-    # define machine name
-    hostname = "mysql"
-    description = "MySQL Server"
-    # template is unprivileged so no need to set option
-    ostemplate = var.ct_template
-    unprivileged = "true"
-    password = var.container_password
-    ssh_public_keys = var.ssh_public_key
+  num_cores = 2
+  memory = 2048
 
-    # start after creation
-    start = "true"
-    # start on boot
-    onboot = "true"
+  disk_size = "32G"
 
-    # ct settings
-    cores = 2
-    memory = 2048
+  proxmox_api_url = var.proxmox_api_url
+  proxmox_api_token_id = var.proxmox_api_token_id
+  proxmox_user = var.proxmox_user
+  proxmox_user_password = var.proxmox_user_password
+  proxmox_api_token_secret = var.proxmox_api_token_secret
 
-    # define network
-    network {
-      bridge = "vmbr0"
-      name = "eth0"
-      ip = "dhcp"
-    }
-
-    # define root fs
-    rootfs {
-      storage = "local-lvm"
-      size    = "32G"
-    }
-
+  ssh_public_key = var.ssh_public_key
+  container_password = var.container_password
+  
 }
-
