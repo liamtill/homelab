@@ -17,3 +17,8 @@ moved {
   from = proxmox_lxc.postgres-server
   to = module.postgres.proxmox_lxc.proxmox-ct[0]
 }
+
+moved {
+  from = proxmox_vm_qemu.totoscrafts[0]
+  to = module.totoscrafts.proxmox_vm_qemu.proxmox-vm[0]
+}

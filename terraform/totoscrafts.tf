@@ -1,56 +1,21 @@
-resource "proxmox_vm_qemu" "totoscrafts" {
+module "totoscrafts" {
+  source = "./modules/proxmox-vm"
 
-    # pve node
-    target_node = "nimbus-pve"
-    count = 1
+  proxmox_api_url = var.proxmox_api_url
+  proxmox_api_token_id = var.proxmox_api_token_id
+  proxmox_user = var.proxmox_user
+  proxmox_user_password = var.proxmox_user_password
+  proxmox_api_token_secret = var.proxmox_api_token_secret
 
-    # define machine name
-    name = "totoscrafts"
-    desc = "Totos Crafts Blog"
-    
-    # enable the qemu-guest-agent
-    agent = 1
+  vm_name = "totoscrafts"
+  vm_description = "Totos Crafts Blog"
 
-    # vm template to clone from
-    clone = var.vm_template
-    # full clone instead of linked clone
-    full_clone  = "true"
+  num_cores = 2
+  memory = 2048
 
-    # vm settings
-    os_type = "cloud-init"
-    cores = 2
-    sockets = 1
-    cpu = "host"
-    memory = 2048
-    scsihw = "virtio-scsi-pci"
-    bootdisk = "scsi0"
-    boot = "cdn"
-    onboot = "true"
-
-    ipconfig0 = "ip=dhcp,ip6=dhcp"
-
-    # define network hw
-    network {
-      bridge = "vmbr0"
-      model = "virtio"
-    }
-
-    # define storage
-    disk {
-        storage = "local-lvm"
-        type = "scsi"
-        size = "32G"
-        # enable ssd emulation
-        ssd = 1
-    }
-
-    lifecycle {
-    ignore_changes  = [
-      network,
-    ]
-  }
+  disk_size = "32G"
+  
 }
-
 
 # generate random 35 character secret for tunnel
 resource "random_id" "tunnel_secret" {
