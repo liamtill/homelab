@@ -16,6 +16,11 @@ resource "proxmox_vm_qemu" "proxmox-vm" {
     # full clone instead of linked clone
     full_clone  = var.clone_type
 
+    # start after creation
+    oncreate = var.start_on_create
+    # start on boot
+    onboot = var.start_on_boot
+
     # vm settings
     os_type = var.os_type
     cores = var.num_cores

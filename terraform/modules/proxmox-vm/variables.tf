@@ -68,6 +68,18 @@ variable "clone_type" {
     default = "true"
 }
 
+variable "start_on_create" {
+    type = string
+    description = "Start container on creation"
+    default = true
+}
+
+variable "start_on_boot" {
+    type = string
+    description = "Start container on boot"
+    default = true
+}
+
 variable "num_cores" {
     type = number
     description = "Number of CPU cores to allocate"
