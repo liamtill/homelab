@@ -227,3 +227,29 @@ http:
           middlewares:
           - default-whitelist
           - default-headers
+
+tcp:
+  services:
+    mysql:
+      loadBalancer:
+        servers:
+        - address: "{{ mysql_ip }}:3306"
+    postgres:
+      loadBalancer:
+        servers:
+        - address: "{{ postgres_ip }}:5432"
+  routers:
+    mysql:
+      to-database:
+        entryPoints:
+          - "mysql"
+        rule: "HostSNI(`{{ mysql_host }}`)"
+        service: mysql
+        tls: {}
+    postgres:
+      to-database:
+        entryPoints:
+          - "postgres"
+        rule: "HostSNI(`{{ postgres_host }}`)"
+        service: postgres
+        tls: {}
