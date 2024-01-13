@@ -12,7 +12,7 @@ module "docker" {
   vm_count = 1
 
   num_cores = 2
-  memory = 2048
+  memory = 4096
 
   disk_size = "64G"
   
