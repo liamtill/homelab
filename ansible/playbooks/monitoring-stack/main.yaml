@@ -1,0 +1,63 @@
+- hosts: monitoring-stack
+  roles:
+    - base
+    - user
+    - docker
+    - deploy_watchtower
+
+  tasks:
+
+    - name: create required directories
+      file: 
+        path: "/home/{{ ansible_user }}/docker/{{ item }}"
+        state: directory
+      loop:
+        - monitoring-stack
+        - monitoring-stack/influxdb-data
+        - monitoring-stack/grafana-data
+        - monitoring-stack/grafana-data/data
+        - monitoring-stack/grafana-data/config
+        - monitoring-stack/loki-data
+        - monitoring-stack/prometheus-data
+        - monitoring-stack/prometheus-data/prometheus
+        - monitoring-stack/prometheus-data/config
+
+    - name: copy docker-compose file
+      template:
+        src: "templates/docker-compose/docker-compose.j2"
+        dest: "/home/{{ ansible_user }}/docker/monitoring-stack/docker-compose.yaml"
+      register: compose
+
+    - name: copy configs
+      template:
+        src: "templates/config/{{ item.template }}"
+        dest: "/home/{{ ansible_user }}/docker/monitoring-stack/{{ item.name }}/{{ item.file }}"
+      loop: 
+        - { name: "grafana-data/config", template: "grafana-datasources.j2", file: "grafana.ini"}
+        - { name: "loki-data", template: "loki-config.yaml", file: "local-config.yaml"}
+        - { name: "prometheus-data/config", template: "prometheus-config.yaml", file: "prometheus.yml"}
+      register: config
+
+    - name: Create network for containers
+      community.docker.docker_network:
+        name: monitoring
+
+    # recreate is smart by default and will recreate when compsoe changes
+    - name: run containers
+      community.docker.docker_compose:
+        project_src: "/home/{{ ansible_user }}/docker/monitoring-stack/"
+      register: output
+
+    - ansible.builtin.debug:
+        var: output
+
+    - name: Restart containers if config changed
+      community.docker.docker_compose:
+        project_src: "/home/{{ ansible_user }}/docker/monitoring-stack/"
+        build: false
+        restarted: true
+      when: config.changed
+      register: output
+
+    - ansible.builtin.debug:
+        var: output

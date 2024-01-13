@@ -1,0 +1,59 @@
+version: "3"
+services:
+  grafana:
+    image: grafana/grafana
+    container_name: grafana
+    restart: unless-stopped
+    user: '1000'
+    ports:
+      - 3000:3000
+    networks:
+      - monitoring
+    volumes:
+      - ./grafana-data/data:/var/lib/grafana
+      - ./grafana-data/config/grafana.ini:/usr/share/grafana/conf/provisioning/datasources/grafana.ini
+  influxdb:
+    image: influxdb
+    container_name: influxdb
+    restart: unless-stopped
+    ports:
+      - 8086:8086
+      - 8089:8089/udp
+    networks:
+      - monitoring
+    volumes:
+      - ./influxdb-data:/var/lib/influxdb
+    environment:
+      - DOCKER_INFLUXDB_INIT_MODE=setup
+      - DOCKER_INFLUXDB_INIT_USERNAME={{ influxdb_user }}
+      - DOCKER_INFLUXDB_INIT_PASSWORD={{ influxdb_password }}
+      - DOCKER_INFLUXDB_INIT_ORG=homelab
+      - DOCKER_INFLUXDB_INIT_BUCKET=proxmox # default for proxmox
+      - DOCKER_INFLUXDB_INIT_RETENTION=14d
+      - DOCKER_INFLUXDB_INIT_ADMIN_TOKEN={{ influxdb_token }}
+  loki:
+    image: grafana/loki:2.8.0
+    container_name: loki
+    restart: unless-stopped
+    ports:
+      - "3100:3100"
+    volumes:
+     - ./loki-data/local-config.yaml:/etc/loki/local-config.yaml
+    command: -config.file=/etc/loki/local-config.yaml
+    networks:
+      - monitoring
+  prometheus:
+    image: prom/prometheus:latest
+    container_name: prometheus
+    user: '1000'
+    ports:
+      - 9090:9090
+    volumes:
+      - ./prometheus-data/config:/etc/prometheus
+      - ./prometheus-data/prometheus:/prometheus
+    command: "--config.file=/etc/prometheus/prometheus.yml"
+    restart: unless-stopped
+
+networks:
+  monitoring:
+    external: true
